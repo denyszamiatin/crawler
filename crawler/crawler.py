@@ -2,8 +2,9 @@
 import constants
 import request
 from lxml import html
-__author__ = 'dzamakhaiev'
 
+__author__ = 'dzamakhaiev'
+from log.log import logger as log
 
 #Glogal vars
 domain = None
@@ -28,6 +29,7 @@ def init(start_url):
     req = request.get_request(domain)
 
     if req is None:
+        log.error('Cannot start script')
         quit("Cannot start script.")
 
     #First item
