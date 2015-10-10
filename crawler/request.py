@@ -1,28 +1,38 @@
 # -*- coding: utf-8 -*-
-import requests
 import multiprocessing
+
+import requests
+
 import constants
+from log.log import logger
 __author__ = 'dzamakhaiev'
 
 requests.packages.urllib3.disable_warnings()
 
 
 def get_request(url):
-        try:
-            req = requests.get(url, verify=False)
-            return req
+    """
+    Gets request by url
+    """
+    try:
+        return requests.get(url, verify=False)
+    except (
+        requests.exceptions.Timeout,
+        requests.exceptions.TooManyRedirects,
+        requests.exceptions.RequestException
+    ) as e:
+        logger.error("{}\n {}".format(e, url))
 
-        except Exception as e:
-            print(e, url)
-            return None
 
-
-def multi_request(new_list):
-    #Prepare multi
+def get_multi_request(urls):
+    """
+    Gets many requests in THREADS processes
+    :param urls:
+    :return:
+    """
     multiprocessing.freeze_support()
     pool = multiprocessing.Pool(processes=constants.THREADS)
-
-    result_array = pool.map(get_request, new_list)
+    pages = pool.map(get_request, urls)
     pool.close()
 
-    return result_array
+    return pages
