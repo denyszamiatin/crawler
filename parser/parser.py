@@ -2,7 +2,7 @@
 from lxml import html
 
 
-def get_html_elements(page, regulars):
+def get_elements(page, regulars):
     """
     Функция парсинга html страницы по выражениям XPath
     :param page: Страница которую нужно парсить
@@ -11,12 +11,8 @@ def get_html_elements(page, regulars):
 
     >>> HTML = '''<div title="buyer-name">Carson Busses</div>'''
     >>> regulars = {'byers': '//div[@title="buyer-name"]/text()'}
-    >>> print get_html_elements(HTML, regulars)
+    >>> print get_elements(HTML, regulars)
     {'byers': ['Carson Busses']}
     """
-
-    tree = html.fromstring(str(page))
-    elements = {}
-    for param in regulars.keys():
-        elements[param] = tree.xpath(regulars[param])
-    return elements
+    tree = html.fromstring(page)
+    return {page_element: tree.xpath(regulars[page_element]) for page_element in regulars}
