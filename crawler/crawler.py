@@ -6,7 +6,7 @@ import request
 import page_collection_class
 from log.log import log_error
 
-DOMAIN = 'http://club-vulkan-777.com/'
+# DOMAIN = 'http://allo.ua/'
 
 
 class Crawler(object):
