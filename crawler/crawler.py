@@ -3,6 +3,7 @@ from lxml import html
 
 import constants
 import request
+import page_collection_class
 from log.log import log_error
 
 DOMAIN = 'http://club-vulkan-777.com/'
@@ -15,57 +16,16 @@ class Crawler(object):
         self.domain = start_url
         self.queue = []
         self.parent_dict = {}
-        self.available = 1
-
-        response = request.get_request(start_url)
-
-        if response is None:
-            quit(log_error("Cannot start script."))
-
-        # First item
-        self.url_dict = self.get_page_description(response, start_url, start_url)
 
     @staticmethod
-    def get_page_description(response, key_url, parent_url):
-        return {
-            key_url: {
-                "is_checked": False,
-                "code": response.status_code,
-                "parent": parent_url,
-                "content": response.text
-            }
-        }
-
-    def increment_available(self):
-        self.available += 1
-
-    def add_urls(self, responses, url_dict):
-        # Check for exist urls
-        for response in responses:
-            if response is None: continue
-
-            if response.url not in url_dict:
-                print(response.status_code, response.url, self.parent_dict.get(response.url))
-
-                url_dict.update(
-                    self.get_page_description(
-                        response,
-                        response.url,
-                        self.parent_dict[response.url]
-                    ))
-                self.increment_available()
-
-        return url_dict
-
-    @staticmethod
-    def filter_exist_urls(new_urls, url_dict):
+    def filter_exist_urls(new_urls, collection_obj):
         """
         Check for new urls
         """
-        return [url for url in new_urls if url not in url_dict]
+        return [url for url in new_urls if url not in collection_obj.get_urls()]
 
-    def add_to_queue(self, new_urls, parent, url_dict):
-        new_urls = self.filter_exist_urls(new_urls, url_dict)
+    def add_to_queue(self, new_urls, parent, collection_obj):
+        new_urls = self.filter_exist_urls(new_urls, collection_obj)
         self.queue.extend(new_urls)
         self.parent_dict.update({url: parent for url in new_urls})
 
@@ -93,11 +53,18 @@ class Crawler(object):
 
     @staticmethod
     def is_not_correct_url(url):
-        return "." in url or \
-            "?" in url or \
+        return "?" in url or \
             len(url) < 3 or \
             url.startswith("#") or \
             url.startswith("//")
+
+    @staticmethod
+    def is_in_list(url, lst):
+        for item in lst:
+            if item in url:
+                return True
+        else:
+            return False
 
     def format_url_list(self, url_list):
         if not self.domain.endswith("/"):
@@ -112,6 +79,12 @@ class Crawler(object):
             url = url.strip()
 
             if self.is_not_correct_url(url):
+                continue
+
+            if self.is_in_list(url, constants.IGNORE_LIST):
+                continue
+
+            if self.is_in_list(url, constants.IMAGE_LIST):
                 continue
 
             if "#" in url:
@@ -131,53 +104,54 @@ class Crawler(object):
 
         return new_url_list
 
-    def main_method(self, url_dict):
-        dict_len = len(url_dict)
+    def main_method(self, page_collection=None):
+        # First item
+        if not page_collection:
+            response = request.get_request(self.domain)
+            if response is None:
+                    quit(log_error("Cannot start script."))
+            page_collection = page_collection_class.PageCollection(self.domain, response, self.domain)
 
         # Start loop
-        for url, params in url_dict.items():
+        for url in page_collection.get_next_unchecked():
 
-            if dict_len == 1:
-                print(params.get("code"), url)
+            if page_collection.get_len() == 1:
+                print page_collection.get_code(url)
 
             # Debug :)
-            elif dict_len > 150:
+            elif page_collection.get_len() > 100:
                 break
 
-            if not params.get("is_checked"):
+            # Get urls from page
+            found_list = self.find_all_urls(page_collection.get_content(url))
 
-                # Get urls from page
-                found_list = self.find_all_urls(params.get("content"))
+            # Add new urls to queue
+            self.add_to_queue(found_list, url, page_collection)
 
-                # Add new urls to queue
-                self.add_to_queue(found_list, url, url_dict)
+            if len(self.queue) >= constants.THREADS or page_collection.get_available() == 0:
 
-                if self.available > 0:
-                    self.available -= 1
+                # Get list for multi-thread check
+                new_list = self.get_list_queue()
 
-                if len(self.queue) >= constants.THREADS or self.available == 0:
+                # Get multi requests
+                responses = request.get_multi_request(new_list)
 
-                    # Get list for multi-thread check
-                    new_list = self.get_list_queue()
+                # Add to url_dict
+                page_collection.add_pages(responses, self.parent_dict)
 
-                    # Get multi requests
-                    result_array = request.get_multi_request(new_list)
+            # Update url in dict
+            page_collection.set_checked(url)
+            page_collection = self.main_method(page_collection)
 
-                    # Add to url_dict
-                    url_dict = self.add_urls(result_array, url_dict)
-
-                # Update url in dict
-                url_dict.get(url).update({"is_checked": True})
-                url_dict = self.main_method(url_dict)
-
-                return url_dict
+            return page_collection
 
         # Get redirect for urls
-        return url_dict
+        return page_collection
 
 
 if __name__ == "__main__":
     # Start script from main page
     crawler = Crawler(DOMAIN)
-    outer_url_dict = crawler.main_method(crawler.url_dict)
-    print len(outer_url_dict)
+    collection = crawler.main_method()
+    print collection.get_len()
+    print collection
