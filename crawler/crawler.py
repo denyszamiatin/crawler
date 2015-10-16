@@ -5,6 +5,7 @@ import constants
 import request
 import page_collection_class
 from log.log import log_error
+from config import *
 
 # DOMAIN = 'http://allo.ua/'
 
