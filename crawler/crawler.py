@@ -5,7 +5,7 @@ import constants
 import request
 from log.log import log_error
 
-DOMAIN = 'http://club-vulkan-777.com/'
+# DOMAIN = 'http://allo.ua/'
 
 
 class Crawler(object):
