@@ -29,14 +29,14 @@ class Crawler(object):
             )
 
     @staticmethod
-    def filter_exist_urls(new_urls, pages):
+    def filter_exist_urls(new_urls, page_collection):
         """
         Check for new urls
         """
-        return [url for url in new_urls if url not in pages.get_urls()]
+        return [url for url in new_urls if url not in page_collection.get_urls()]
 
-    def add_to_queue(self, new_urls, parent, pages):
-        new_urls = self.filter_exist_urls(new_urls, pages)
+    def add_to_queue(self, new_urls, parent, page_collection):
+        new_urls = self.filter_exist_urls(new_urls, page_collection)
         self.queue.extend(new_urls)
         self.parent_dict.update({url: parent for url in new_urls})
 
@@ -130,7 +130,7 @@ class Crawler(object):
         while url:
 
             if page_collection.get_len() == 1:
-                print page_collection.is_valid_page(url)
+                print page_collection.get_code(url), url
 
             # Debug :)
             elif page_collection.get_len() > MAX_URLS:
