@@ -8,7 +8,10 @@ DATABASE = 'mongodb://localhost:27017/'
 DOMAIN = 'http://allo.ua/'
 
 REGULARS = {
-    'покупатель': '//div[@title="buyer-name"]/text()',
-    'цены': '//span[@class="item-price"]/text()',
-    'компания': '//span[@class="item-company"]/text()',
+    'title': '//title/text()'
+    # 'покупатель': '//div[@title="buyer-name"]/text()',
+    # 'цены': '//span[@class="item-price"]/text()',
+    # 'компания': '//span[@class="item-company"]/text()',
     }
+
+MAX_URLS = 100
