@@ -3,7 +3,7 @@ from lxml import html
 
 import constants
 import request
-import page_collection_class
+import pages
 from log.log import log_error
 from config import *
 
@@ -19,14 +19,14 @@ class Crawler(object):
         self.parent_dict = {}
 
     @staticmethod
-    def filter_exist_urls(new_urls, collection_obj):
+    def filter_exist_urls(new_urls, pages):
         """
         Check for new urls
         """
-        return [url for url in new_urls if url not in collection_obj.get_urls()]
+        return [url for url in new_urls if url not in pages.get_urls()]
 
-    def add_to_queue(self, new_urls, parent, collection_obj):
-        new_urls = self.filter_exist_urls(new_urls, collection_obj)
+    def add_to_queue(self, new_urls, parent, pages):
+        new_urls = self.filter_exist_urls(new_urls, pages)
         self.queue.extend(new_urls)
         self.parent_dict.update({url: parent for url in new_urls})
 
@@ -105,31 +105,41 @@ class Crawler(object):
 
         return new_url_list
 
-    def main_method(self, page_collection=None):
+    def crawl(self, page_collection=None):
+        """
+
+        :param page_collection:
+        :return: PageCollection instance
+        """
         # First item
         if not page_collection:
             response = request.get_request(self.domain)
             if response is None:
-                    quit(log_error("Cannot start script."))
-            page_collection = page_collection_class.PageCollection(self.domain, response, self.domain)
+                quit(log_error("Cannot start script."))
+            page_collection = pages.PageCollection(
+                self.domain,
+                response,
+                self.domain
+            )
 
         # Start loop
-        for url in page_collection.get_next_unchecked():
+        url = page_collection.get_next_unchecked()
+        while url:
 
             if page_collection.get_len() == 1:
-                print page_collection.get_code(url)
+                print page_collection.is_valid_page(url)
 
             # Debug :)
-            elif page_collection.get_len() > 100:
+            elif page_collection.get_len() > MAX_URLS:
                 break
 
             # Get urls from page
-            found_list = self.find_all_urls(page_collection.get_content(url))
+            urls_to_check = self.find_all_urls(page_collection.get_content(url))
 
             # Add new urls to queue
-            self.add_to_queue(found_list, url, page_collection)
+            self.add_to_queue(urls_to_check, url, page_collection)
 
-            if len(self.queue) >= constants.THREADS or page_collection.get_available() == 0:
+            if len(self.queue) >= constants.THREADS or not page_collection.is_available():
 
                 # Get list for multi-thread check
                 new_list = self.get_list_queue()
@@ -142,9 +152,9 @@ class Crawler(object):
 
             # Update url in dict
             page_collection.set_checked(url)
-            page_collection = self.main_method(page_collection)
+            url = page_collection.get_next_unchecked()
+            print "Fetching {}".format(url)
 
-            return page_collection
 
         # Get redirect for urls
         return page_collection
@@ -153,6 +163,6 @@ class Crawler(object):
 if __name__ == "__main__":
     # Start script from main page
     crawler = Crawler(DOMAIN)
-    collection = crawler.main_method()
+    collection = crawler.crawl()
     print collection.get_len()
     print collection

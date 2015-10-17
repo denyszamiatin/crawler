@@ -7,13 +7,14 @@ from config import *
 
 def main():
     site_crawler = crawler.Crawler(DOMAIN)
-    collection = site_crawler.main_method()
+    collection = site_crawler.crawl()
+    print len(collection.page_collection)
     data_saver = saver.DatabaseWorker()
 
-    for key, value in collection.items():
-        result = parser.get_elements(value['content'], REGULARS)
-        result['url'] = key
-        data_saver.save_item(result)
+    for url, content in collection.pages_content():
+        nodes = parser.get_elements(content, REGULARS)
+        nodes['url'] = url
+        data_saver.save_item(nodes)
 
 
 if __name__ == "__main__":
