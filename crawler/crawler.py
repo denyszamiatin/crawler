@@ -18,15 +18,25 @@ class Crawler(object):
         self.queue = []
         self.parent_dict = {}
 
+    def start_crawling(self):
+        response = request.get_request(self.domain)
+        if response is None:
+                quit(log_error("Cannot start script."))
+        return pages.PageCollection(
+                self.domain,
+                response,
+                self.domain
+            )
+
     @staticmethod
-    def filter_exist_urls(new_urls, pages):
+    def filter_exist_urls(new_urls, page_collection):
         """
         Check for new urls
         """
-        return [url for url in new_urls if url not in pages.get_urls()]
+        return [url for url in new_urls if url not in page_collection.get_urls()]
 
-    def add_to_queue(self, new_urls, parent, pages):
-        new_urls = self.filter_exist_urls(new_urls, pages)
+    def add_to_queue(self, new_urls, parent, page_collection):
+        new_urls = self.filter_exist_urls(new_urls, page_collection)
         self.queue.extend(new_urls)
         self.parent_dict.update({url: parent for url in new_urls})
 
@@ -107,27 +117,20 @@ class Crawler(object):
 
     def crawl(self, page_collection=None):
         """
-
-        :param page_collection:
+        Crawling page on site starting from domain
+        :param page_collection: PageCollection instance
         :return: PageCollection instance
         """
         # First item
         if not page_collection:
-            response = request.get_request(self.domain)
-            if response is None:
-                quit(log_error("Cannot start script."))
-            page_collection = pages.PageCollection(
-                self.domain,
-                response,
-                self.domain
-            )
+            page_collection = self.start_crawling()
 
         # Start loop
         url = page_collection.get_next_unchecked()
         while url:
 
             if page_collection.get_len() == 1:
-                print page_collection.is_valid_page(url)
+                print page_collection.get_code(url), url
 
             # Debug :)
             elif page_collection.get_len() > MAX_URLS:
@@ -155,10 +158,8 @@ class Crawler(object):
             url = page_collection.get_next_unchecked()
             print "Fetching {}".format(url)
 
-
         # Get redirect for urls
         return page_collection
-
 
 if __name__ == "__main__":
     # Start script from main page

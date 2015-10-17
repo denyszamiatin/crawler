@@ -54,6 +54,9 @@ class PageCollection(object):
     def get_content(self, url):
         return self.page_collection[url]["content"]
 
+    def get_code(self, url):
+        return self.page_collection[url]["code"]
+
     def get_len(self):
         return len(self.page_collection)
 
