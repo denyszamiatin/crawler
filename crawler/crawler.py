@@ -18,6 +18,16 @@ class Crawler(object):
         self.queue = []
         self.parent_dict = {}
 
+    def start_crawling(self):
+        response = request.get_request(self.domain)
+        if response is None:
+                quit(log_error("Cannot start script."))
+        return pages.PageCollection(
+                self.domain,
+                response,
+                self.domain
+            )
+
     @staticmethod
     def filter_exist_urls(new_urls, pages):
         """
@@ -107,20 +117,13 @@ class Crawler(object):
 
     def crawl(self, page_collection=None):
         """
-
-        :param page_collection:
+        Crawling page on site starting from domain
+        :param page_collection: PageCollection instance
         :return: PageCollection instance
         """
         # First item
         if not page_collection:
-            response = request.get_request(self.domain)
-            if response is None:
-                quit(log_error("Cannot start script."))
-            page_collection = pages.PageCollection(
-                self.domain,
-                response,
-                self.domain
-            )
+            page_collection = self.start_crawling()
 
         # Start loop
         url = page_collection.get_next_unchecked()
@@ -155,10 +158,8 @@ class Crawler(object):
             url = page_collection.get_next_unchecked()
             print "Fetching {}".format(url)
 
-
         # Get redirect for urls
         return page_collection
-
 
 if __name__ == "__main__":
     # Start script from main page
