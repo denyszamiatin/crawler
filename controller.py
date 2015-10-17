@@ -1,6 +1,7 @@
 from crawler import crawler
 from parser import parser
 from mongo import saver
+from redis.redis_db import RedisDataBase
 
 from config import *
 
@@ -14,7 +15,7 @@ def main():
         result = parser.get_elements(value['content'], REGULARS)
         result['url'] = key
         data_saver.save_item(result)
-
+        RedisDataBase.save_to_db(result['url'], key)
 
 if __name__ == "__main__":
     main()
