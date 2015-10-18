@@ -7,7 +7,7 @@ import pages
 from log.log import log_error
 from config import *
 
-# DOMAIN = 'http://allo.ua/'
+# DOMAIN = "http://club-vulkan-777.com/"
 
 
 class Crawler(object):
@@ -50,7 +50,7 @@ class Crawler(object):
 
     def find_all_urls(self, page_source):
         # Initialize lxml parser
-        page = html.fromstring(page_source)
+        page = html.fromstring(page_source.encode('utf-8'))
 
         # Find start of link
         url_list = []
