@@ -9,7 +9,7 @@ from config import *
 def main():
     site_crawler = crawler.Crawler(DOMAIN)
     collection = site_crawler.crawl()
-    print len(collection.page_collection)
+    print collection.get_len()
     data_saver = saver.DatabaseWorker()
     for url, content in collection.pages_content():
         nodes = parser.get_elements(content, REGULARS)
