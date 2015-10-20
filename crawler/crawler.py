@@ -23,10 +23,10 @@ class Crawler(object):
         if response is None:
                 quit(log_error("Cannot start script."))
         return pages.PageCollection(
-                self.domain,
-                response,
-                self.domain
-            )
+            self.domain,
+            response,
+            self.domain
+        )
 
     @staticmethod
     def filter_exist_urls(new_urls, page_collection):
@@ -130,14 +130,14 @@ class Crawler(object):
         while url:
 
             if page_collection.get_len() == 1:
-                print page_collection.get_code(url), url
+                print page_collection.pages[url].get_code(), url
 
             # Debug :)
             elif page_collection.get_len() > MAX_URLS:
                 break
 
             # Get urls from page
-            urls_to_check = self.find_all_urls(page_collection.get_content(url))
+            urls_to_check = self.find_all_urls(page_collection.pages[url].get_content())
 
             # Add new urls to queue
             self.add_to_queue(urls_to_check, url, page_collection)
@@ -154,7 +154,7 @@ class Crawler(object):
                 page_collection.add_pages(responses, self.parent_dict)
 
             # Update url in dict
-            page_collection.set_checked(url)
+            page_collection.pages[url].set_checked()
             url = page_collection.get_next_unchecked()
             print "Fetching {}".format(url)
 
