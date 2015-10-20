@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from crawler import Crawler
+from crawler.crawler import Crawler
 
 
 class TestFindUrls(unittest.TestCase):
