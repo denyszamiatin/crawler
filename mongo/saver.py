@@ -19,5 +19,6 @@ class DatabaseWorker(object):
     db = client.goods
 
     @staticmethod
-    def save_item(data):
-        return DatabaseWorker.db.items.insert_one(data).inserted_id
+    def save_item(url, nodes):
+        nodes['url'] = url
+        return DatabaseWorker.db.items.insert_one(nodes).inserted_id

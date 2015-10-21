@@ -13,8 +13,7 @@ def main():
     data_saver = saver.DatabaseWorker()
     for url, content in collection.pages_content():
         nodes = parser.get_elements(content, REGULARS)
-        nodes['url'] = url
-        data_saver.save_item(nodes)
+        data_saver.save_item(url, nodes)
         save_to_db(url, nodes)
 
 
