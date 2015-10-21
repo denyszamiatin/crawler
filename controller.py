@@ -1,5 +1,5 @@
 from crawler import crawler
-from parser import parser
+from html_parser import parser
 from mongo import saver
 from redis_db.redis_db import save_to_db
 
