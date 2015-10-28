@@ -8,8 +8,6 @@ from log.log import log_error
 from config import *
 from url_validator import URLValidator
 
-# DOMAIN = "http://club-vulkan-777.com/"
-
 
 class Crawler(object):
 
@@ -22,7 +20,7 @@ class Crawler(object):
     def start_crawling(self):
         response = request.get_request(self.domain)
         if response is None:
-                quit(log_error("Cannot start script."))
+            quit(log_error("Cannot start script."))
         return pages.PageCollection(
             self.domain,
             response,
@@ -41,10 +39,6 @@ class Crawler(object):
         self.queue.extend(new_urls)
         self.parent_dict.update({url: parent for url in new_urls})
 
-    @staticmethod
-    def get_unique_list(old):
-        return list(set(old))
-
     def get_list_queue(self):
         new_urls, self.queue = self.queue[:constants.THREADS], self.queue[constants.THREADS:]
         return new_urls
@@ -52,13 +46,16 @@ class Crawler(object):
     def find_all_urls(self, page_source):
         # Initialize lxml parser
         page = html.fromstring(page_source.encode('utf-8'))
+        url_list = []
 
         # Find start of link
-        url_list = []
         url_list.extend(page.xpath('//a/@href'))
         url_list.extend(page.xpath('//link/@href'))
 
-        url_list = self.get_unique_list(url_list)
+        # remove duplicates of urls
+        url_list = set(url_list)
+
+        # validate urls
         validation_input = URLValidator(url_list, self.domain)
         url_list = validation_input.validate()
 
