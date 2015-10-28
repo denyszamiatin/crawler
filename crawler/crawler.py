@@ -6,6 +6,7 @@ import request
 import pages
 from log.log import log_error
 from config import *
+from url_validator import URLValidator
 
 # DOMAIN = "http://club-vulkan-777.com/"
 
@@ -58,62 +59,10 @@ class Crawler(object):
         url_list.extend(page.xpath('//link/@href'))
 
         url_list = self.get_unique_list(url_list)
-        url_list = self.format_url_list(url_list)
+        validation_input = URLValidator(url_list, self.domain)
+        url_list = validation_input.validate()
 
         return url_list
-
-    @staticmethod
-    def is_not_correct_url(url):
-        return "?" in url or \
-            len(url) < 3 or \
-            url.startswith("#") or \
-            url.startswith("//")
-
-    @staticmethod
-    def is_in_list(url, lst):
-        for item in lst:
-            if item in url:
-                return True
-        else:
-            return False
-
-    def format_url_list(self, url_list):
-        if not self.domain.endswith("/"):
-            self.domain += "/"
-
-        # Delete doubles from list
-        new_url_list = []
-
-        # Find all valid relative links
-        for url in url_list:
-
-            url = url.strip()
-
-            if self.is_not_correct_url(url):
-                continue
-
-            if self.is_in_list(url, constants.IGNORE_LIST):
-                continue
-
-            if self.is_in_list(url, constants.IMAGE_LIST):
-                continue
-
-            if "#" in url:
-                url = url[:url.find("#")]
-
-            if url.startswith("/"):
-                new_url_list.append(self.domain + url[1:])
-
-            elif url.startswith("http") and self.domain in url:
-                new_url_list.append(url)
-
-            elif url.startswith("http") and self.domain not in url:
-                continue
-
-            else:
-                new_url_list.append(self.domain + url)
-
-        return new_url_list
 
     def crawl(self, page_collection=None):
         """
