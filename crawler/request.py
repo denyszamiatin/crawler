@@ -31,7 +31,7 @@ def get_multi_request(urls):
     :return:
     """
     multiprocessing.freeze_support()
-    pool = multiprocessing.Pool(processes=constants.THREADS)
+    pool = multiprocessing.Pool(processes=config.THREADS)
     pages = pool.map(get_request, urls)
     pool.close()
 

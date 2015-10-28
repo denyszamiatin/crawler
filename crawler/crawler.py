@@ -40,7 +40,7 @@ class Crawler(object):
         self.parent_dict.update({url: parent for url in new_urls})
 
     def get_list_queue(self):
-        new_urls, self.queue = self.queue[:constants.THREADS], self.queue[constants.THREADS:]
+        new_urls, self.queue = self.queue[:config.THREADS], self.queue[config.THREADS:]
         return new_urls
 
     def find_all_urls(self, page_source):
@@ -88,7 +88,7 @@ class Crawler(object):
             # Add new urls to queue
             self.add_to_queue(urls_to_check, url, page_collection)
 
-            if len(self.queue) >= constants.THREADS or not page_collection.is_available():
+            if len(self.queue) >= config.THREADS or not page_collection.is_available():
 
                 # Get list for multi-thread check
                 new_list = self.get_list_queue()
