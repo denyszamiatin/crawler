@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from constants import IMAGE_LIST, IGNORE_LIST
+from config import IMAGE_LIST, IGNORE_LIST
 
 
 class URLValidator(object):
@@ -31,10 +31,10 @@ class URLValidator(object):
 
         for url in self.url_list:
 
-            if self.is_not_correct_url(url) or \
-                    self.is_in_list(url, IGNORE_LIST)\
-                    or self.is_in_list(url, IMAGE_LIST) or \
-                    (url.startswith("http") and self.domain not in url):
+            if any((self.is_not_correct_url(url),
+                    self.is_in_list(url, IGNORE_LIST),
+                    self.is_in_list(url, IMAGE_LIST),
+                    (url.startswith("http") and self.domain not in url))):
                 continue
 
             if "#" in url:

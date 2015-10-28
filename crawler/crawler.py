@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from lxml import html
 
-import constants
+import config
 import request
 import pages
 from log.log import log_error

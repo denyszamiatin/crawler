@@ -16,9 +16,6 @@ class Page(object):
     def get_code(self):
         return self.code
 
-    def get_parent(self):
-        return self.parent
-
     def get_content(self):
         return self.content
 

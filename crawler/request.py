@@ -3,7 +3,7 @@ import multiprocessing
 
 import requests
 
-import constants
+import config
 from log.log import logger
 __author__ = 'dzamakhaiev'
 
