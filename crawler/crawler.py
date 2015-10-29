@@ -5,7 +5,6 @@ import config
 import request
 import pages
 from log.log import log_error
-from config import *
 from url_validator import URLValidator
 
 
@@ -79,7 +78,7 @@ class Crawler(object):
                 print page_collection.pages[url].get_code(), url
 
             # Debug :)
-            elif page_collection.get_len() > MAX_URLS:
+            elif page_collection.get_len() > config.MAX_URLS:
                 break
 
             # Get urls from page
@@ -109,7 +108,7 @@ class Crawler(object):
 
 if __name__ == "__main__":
     # Start script from main page
-    crawler = Crawler(DOMAIN)
+    crawler = Crawler(config.DOMAIN)
     collection = crawler.crawl()
     print collection.get_len()
     print collection
